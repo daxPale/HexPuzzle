@@ -9,11 +9,17 @@ public class GridSystem : MonoBehaviour
     [SerializeField] private List<Color> colors;
     private float hexWidth = 2;
     private float hexHeight = Mathf.Sqrt(3);
+    private List<Transform> hexagons = new List<Transform>();
 
     [SerializeField] private float gridWidth = 9;
     [SerializeField] private float gridHeight = 8;
     [SerializeField] private float gap = 0.1f;
 
+    public List<Transform> Hexagons { get { return hexagons; } private set { } }
+    public float HexWidth { get { return hexWidth; } private set { } }
+    public float HexHeight { get { return hexHeight; } private set { } }
+    public float GridWidth { get { return gridWidth; } private set { } }
+    public float GridHeight { get { return gridHeight; } private set { } }
     private void AddGap()
     {
         hexWidth += hexWidth * gap;
@@ -53,6 +59,7 @@ public class GridSystem : MonoBehaviour
                 instance.position = CalculateHexPosition(x, y);
                 instance.parent = this.transform;
                 SetHexColor(instance);
+                hexagons.Add(instance);
             }
         }
     }
