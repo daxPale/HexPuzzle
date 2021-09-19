@@ -9,13 +9,15 @@ public class GridSystem : MonoBehaviour
     [SerializeField] private List<Color> colors;
     private float hexWidth = 2;
     private float hexHeight = Mathf.Sqrt(3);
-    private List<Transform> hexagons = new List<Transform>();
+    private List<Transform> hexTransforms = new List<Transform>();
+    private Hexagon[,] hexagons;
 
     [SerializeField] private float gridWidth = 9;
     [SerializeField] private float gridHeight = 8;
     [SerializeField] private float gap = 0.1f;
 
-    public List<Transform> Hexagons { get { return hexagons; } private set { } }
+    public List<Transform> HexTransforms { get { return hexTransforms; } private set { } }
+    public Hexagon[,] Hexagons { get { return hexagons; } private set { } }
     public float HexWidth { get { return hexWidth; } private set { } }
     public float HexHeight { get { return hexHeight; } private set { } }
     public float GridWidth { get { return gridWidth; } private set { } }
@@ -40,14 +42,6 @@ public class GridSystem : MonoBehaviour
 
         return new Vector3(posX, posY, 0);
     }
-
-    private void SetHexColor(Transform hexagon)
-    {
-        int index = Random.Range(0, colors.Count);
-        var renderer = hexagon.GetComponent<Renderer>();
-        renderer.material.SetColor("_Color", colors[index]);
-    }
-
     private void CreateGrid()
     {
         for (int y = 0; y < gridHeight; y++)
@@ -58,8 +52,8 @@ public class GridSystem : MonoBehaviour
                 instance.name = "Hexagon" + "(" + x + "," + y + ")";
                 instance.position = CalculateHexPosition(x, y);
                 instance.parent = this.transform;
-                SetHexColor(instance);
-                hexagons.Add(instance);
+                hexTransforms.Add(instance);
+                hexagons[x,y] = instance.GetComponent<Hexagon>();
             }
         }
     }
@@ -73,6 +67,11 @@ public class GridSystem : MonoBehaviour
         mainCamera.GetComponent<Transform>().position += new Vector3(width, height, 0);
     }
 
+    private void Awake()
+    {
+        hexagons = new Hexagon[(int)gridWidth, (int)gridHeight];
+    }
+
     void Start()
     {
         AddGap();
@@ -80,7 +79,6 @@ public class GridSystem : MonoBehaviour
         AdjustCameraPos();
     }
 
-    
     void Update()
     {
         
