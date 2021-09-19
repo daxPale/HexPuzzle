@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 using static RotationPoint;
 
@@ -48,39 +49,73 @@ public class DotSystem : MonoBehaviour
          * Neighbours can be found by rotation point indexes
          * But the calculation of the indexes depends on which column that rotation point is in
          */
-
-        Neighbours neighbours = point.neighbours;
         int type = column % 4;
-        Debug.Log(column);
+
         switch (type)
         {
             case 0:
                 point.type = EPointType.RIGHT;
-                neighbours.up = grids.Hexagons[column / 2, row + 1];
-                neighbours.down = grids.Hexagons[column / 2, row];
-                neighbours.side = grids.Hexagons[(column / 2) + 1, row + 1];
+                point.neighbours.up = grids.Hexagons[column / 2, row + 1];
+                point.neighbours.down = grids.Hexagons[column / 2, row];
+                point.neighbours.side = grids.Hexagons[(column / 2) + 1, row + 1];
                 break;
             case 1:
                 point.type = EPointType.LEFT;
-                neighbours.up = grids.Hexagons[(column + 1) / 2, row + 1];
-                neighbours.down = grids.Hexagons[(column + 1) / 2, row];
-                neighbours.side = grids.Hexagons[((column + 1) / 2) - 1, row];
+                point.neighbours.up = grids.Hexagons[(column + 1) / 2, row + 1];
+                point.neighbours.down = grids.Hexagons[(column + 1) / 2, row];
+                point.neighbours.side = grids.Hexagons[((column + 1) / 2) - 1, row];
                 break;
             case 2:
                 point.type = EPointType.RIGHT;
-                neighbours.up = grids.Hexagons[column / 2, row + 1];
-                neighbours.down = grids.Hexagons[column / 2, row];
-                neighbours.side = grids.Hexagons[column / 2, row];
+                point.neighbours.up = grids.Hexagons[column / 2, row + 1];
+                point.neighbours.down = grids.Hexagons[column / 2, row];
+                point.neighbours.side = grids.Hexagons[(column / 2) + 1, row];
                 break;
             case 3:
                 point.type = EPointType.LEFT;
-                neighbours.up = grids.Hexagons[(column + 1) / 2, row + 1];
-                neighbours.down = grids.Hexagons[(column + 1) / 2, row];
-                neighbours.side = grids.Hexagons[((column + 1) / 2) - 1, row + 1];  
+                point.neighbours.up = grids.Hexagons[(column + 1) / 2, row + 1];
+                point.neighbours.down = grids.Hexagons[(column + 1) / 2, row];
+                point.neighbours.side = grids.Hexagons[((column + 1) / 2) - 1, row + 1];  
                 break;
             default:
                 break;
         } 
+    }
+
+    private void SetFirstColors(RotationPoint point)
+    {
+        //TODO: Same color check needs improvement
+
+        int colorIndex = 0;
+        Neighbours hexagons = point.neighbours;
+        List<Color> colors = grids.Colors;
+       
+        List<Material> materials = new List<Material>()
+        {
+            hexagons.up.GetComponent<Renderer>().material,
+            hexagons.down.GetComponent<Renderer>().material,
+            hexagons.side.GetComponent<Renderer>().material,
+        };
+
+        foreach (var mat in materials)
+        {
+            if (mat.GetColor("_Color") == Color.white)
+            {
+                colorIndex = Random.Range(0, colors.Count);
+                mat.SetColor("_Color", colors[colorIndex]);
+            }
+     
+        }
+
+        if (materials[0].GetColor("_Color") == materials[1].GetColor("_Color") &&
+            materials[1].GetColor("_Color") == materials[2].GetColor("_Color"))
+        {
+            foreach (var mat in materials)
+            {
+                colorIndex = Random.Range(0, colors.Count);
+                mat.SetColor("_Color", colors[colorIndex]);
+            }
+        }
     }
 
     private void CreateRotatePoints()
@@ -107,6 +142,7 @@ public class DotSystem : MonoBehaviour
                     dotPos = InstantiateTopRight(hexPos);
                     RotationPoint point = dotPos.GetComponentInParent<RotationPoint>();
                     FindNeighbours(point, dotX, y);
+                    SetFirstColors(point);
                     dots[dotX, y] = point;
                 }
                 else if (x == grids.GridWidth - 1) //Last coloum hexagons have only top left rotation point 
@@ -115,6 +151,7 @@ public class DotSystem : MonoBehaviour
                     dotPos = InstantiateTopLeft(hexPos);
                     RotationPoint point = dotPos.GetComponentInParent<RotationPoint>();
                     FindNeighbours(point, dotX, y);
+                    SetFirstColors(point);
                     dots[dotX, y] = point;
                 }
                 else // Other hexagons -except top row- have both rotation points 
@@ -123,12 +160,14 @@ public class DotSystem : MonoBehaviour
                     dotPos = InstantiateTopLeft(hexPos);
                     RotationPoint point = dotPos.GetComponentInParent<RotationPoint>();
                     FindNeighbours(point, dotX, y);
+                    SetFirstColors(point);
                     dots[dotX, y] = point;
 
                     dotX = 2 * x;
                     dotPos = InstantiateTopRight(hexPos);
                     RotationPoint point2 = dotPos.GetComponentInParent<RotationPoint>();
                     FindNeighbours(point2, dotX, y);
+                    SetFirstColors(point2);
                     dots[dotX, y] = point2;
                 }
             }

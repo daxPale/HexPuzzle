@@ -18,6 +18,7 @@ public class GridSystem : MonoBehaviour
 
     public List<Transform> HexTransforms { get { return hexTransforms; } private set { } }
     public Hexagon[,] Hexagons { get { return hexagons; } private set { } }
+    public List<Color> Colors { get { return colors; } private set { } }
     public float HexWidth { get { return hexWidth; } private set { } }
     public float HexHeight { get { return hexHeight; } private set { } }
     public float GridWidth { get { return gridWidth; } private set { } }
@@ -42,6 +43,7 @@ public class GridSystem : MonoBehaviour
 
         return new Vector3(posX, posY, 0);
     }
+
     private void CreateGrid()
     {
         for (int y = 0; y < gridHeight; y++)
