@@ -17,12 +17,18 @@ public class GridSystem : MonoBehaviour
     [SerializeField] private float gap = 0.1f;
 
     public List<Transform> HexTransforms { get { return hexTransforms; } private set { } }
-    public Hexagon[,] Hexagons { get { return hexagons; } private set { } }
+    public Hexagon[,] Hexagons { get { return hexagons; } }
     public List<Color> Colors { get { return colors; } private set { } }
     public float HexWidth { get { return hexWidth; } private set { } }
     public float HexHeight { get { return hexHeight; } private set { } }
     public float GridWidth { get { return gridWidth; } private set { } }
     public float GridHeight { get { return gridHeight; } private set { } }
+
+    public Hexagon GetHexWithIndex(Vector2Int indexes)
+    {
+        return hexagons[indexes.x, indexes.y];
+    }
+
     private void AddGap()
     {
         hexWidth += hexWidth * gap;

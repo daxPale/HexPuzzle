@@ -12,11 +12,12 @@ public class RotationPoint : MonoBehaviour
         RIGHT
     }
 
+    //Neighbors hold the indexes of neighbor hexagons of rotation point
     public struct Neighbours
     {
-        public Hexagon up;
-        public Hexagon down;
-        public Hexagon side;
+        public Vector2Int up;
+        public Vector2Int down;
+        public Vector2Int side;
     }
     // Start is called before the first frame update
     void Start()

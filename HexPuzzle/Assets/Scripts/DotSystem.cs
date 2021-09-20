@@ -55,27 +55,27 @@ public class DotSystem : MonoBehaviour
         {
             case 0:
                 point.type = EPointType.RIGHT;
-                point.neighbours.up = grids.Hexagons[column / 2, row + 1];
-                point.neighbours.down = grids.Hexagons[column / 2, row];
-                point.neighbours.side = grids.Hexagons[(column / 2) + 1, row + 1];
+                point.neighbours.up = new Vector2Int(column / 2, row + 1);
+                point.neighbours.down = new Vector2Int(column / 2, row);
+                point.neighbours.side = new Vector2Int((column / 2) + 1, row + 1); 
                 break;
             case 1:
                 point.type = EPointType.LEFT;
-                point.neighbours.up = grids.Hexagons[(column + 1) / 2, row + 1];
-                point.neighbours.down = grids.Hexagons[(column + 1) / 2, row];
-                point.neighbours.side = grids.Hexagons[((column + 1) / 2) - 1, row];
+                point.neighbours.up = new Vector2Int((column + 1) / 2, row + 1);
+                point.neighbours.down = new Vector2Int((column + 1) / 2, row);
+                point.neighbours.side = new Vector2Int(((column + 1) / 2) - 1, row);
                 break;
             case 2:
                 point.type = EPointType.RIGHT;
-                point.neighbours.up = grids.Hexagons[column / 2, row + 1];
-                point.neighbours.down = grids.Hexagons[column / 2, row];
-                point.neighbours.side = grids.Hexagons[(column / 2) + 1, row];
+                point.neighbours.up = new Vector2Int(column / 2, row + 1);
+                point.neighbours.down = new Vector2Int(column / 2, row);
+                point.neighbours.side = new Vector2Int((column / 2) + 1, row);
                 break;
             case 3:
                 point.type = EPointType.LEFT;
-                point.neighbours.up = grids.Hexagons[(column + 1) / 2, row + 1];
-                point.neighbours.down = grids.Hexagons[(column + 1) / 2, row];
-                point.neighbours.side = grids.Hexagons[((column + 1) / 2) - 1, row + 1];  
+                point.neighbours.up = new Vector2Int((column + 1) / 2, row + 1);
+                point.neighbours.down = new Vector2Int((column + 1) / 2, row);
+                point.neighbours.side = new Vector2Int(((column + 1) / 2) - 1, row + 1);
                 break;
             default:
                 break;
@@ -87,14 +87,14 @@ public class DotSystem : MonoBehaviour
         //TODO: Same color check needs improvement
 
         int colorIndex = 0;
-        Neighbours hexagons = point.neighbours;
+        Neighbours neighbours = point.neighbours;
         List<Color> colors = grids.Colors;
        
         List<Material> materials = new List<Material>()
         {
-            hexagons.up.GetComponent<Renderer>().material,
-            hexagons.down.GetComponent<Renderer>().material,
-            hexagons.side.GetComponent<Renderer>().material,
+            grids.GetHexWithIndex(neighbours.up).GetComponent<Renderer>().material,
+            grids.GetHexWithIndex(neighbours.down).GetComponent<Renderer>().material,
+            grids.GetHexWithIndex(neighbours.side).GetComponent<Renderer>().material,
         };
 
         foreach (var mat in materials)
@@ -183,19 +183,16 @@ public class DotSystem : MonoBehaviour
                  * side->up
                  * up->down
                  * down->side
-                 */
-                Vector3 upPosL = point.neighbours.up.transform.position;
-                Vector3 downPosL = point.neighbours.down.transform.position;
-                Vector3 sidePosL = point.neighbours.side.transform.position;
-
-                Hexagon tempL = point.neighbours.side;
-                point.neighbours.side = point.neighbours.down;
-                point.neighbours.down = point.neighbours.up;
-                point.neighbours.up = tempL;
-                
-                point.neighbours.up.transform.position = upPosL;
-                point.neighbours.down.transform.position = downPosL;
-                point.neighbours.side.transform.position = sidePosL;
+                 */             
+                Vector3 tempL = grids.GetHexWithIndex(point.neighbours.side).transform.position;
+                grids.GetHexWithIndex(point.neighbours.side).transform.position = grids.GetHexWithIndex(point.neighbours.up).transform.position;
+                grids.GetHexWithIndex(point.neighbours.up).transform.position = grids.GetHexWithIndex(point.neighbours.down).transform.position;
+                grids.GetHexWithIndex(point.neighbours.down).transform.position = tempL;
+           
+                Hexagon tempHexL = grids.GetHexWithIndex(point.neighbours.side);
+                grids.Hexagons[point.neighbours.side.x, point.neighbours.side.y] = grids.GetHexWithIndex(point.neighbours.down);
+                grids.Hexagons[point.neighbours.down.x, point.neighbours.down.y] = grids.GetHexWithIndex(point.neighbours.up);
+                grids.Hexagons[point.neighbours.up.x, point.neighbours.up.y] = tempHexL;
                 break;
             case EPointType.RIGHT:
                 /*
@@ -203,18 +200,15 @@ public class DotSystem : MonoBehaviour
                 * side->down
                 * down->up
                 */
-                Vector3 upPosR = point.neighbours.up.transform.position;
-                Vector3 downPosR = point.neighbours.down.transform.position;
-                Vector3 sidePosR = point.neighbours.side.transform.position;
-             
-                Hexagon tempR = point.neighbours.up;
-                point.neighbours.up = point.neighbours.down;
-                point.neighbours.down = point.neighbours.side;
-                point.neighbours.side = tempR;
+                Vector3 tempR = grids.GetHexWithIndex(point.neighbours.up).transform.position;
+                grids.GetHexWithIndex(point.neighbours.up).transform.position = grids.GetHexWithIndex(point.neighbours.side).transform.position;
+                grids.GetHexWithIndex(point.neighbours.side).transform.position = grids.GetHexWithIndex(point.neighbours.down).transform.position;
+                grids.GetHexWithIndex(point.neighbours.down).transform.position = tempR;
 
-                point.neighbours.up.transform.position = upPosR;
-                point.neighbours.down.transform.position = downPosR;
-                point.neighbours.side.transform.position = sidePosR;
+                Hexagon tempHexR = grids.GetHexWithIndex(point.neighbours.up);
+                grids.Hexagons[point.neighbours.up.x, point.neighbours.side.y] = grids.GetHexWithIndex(point.neighbours.down);
+                grids.Hexagons[point.neighbours.down.x, point.neighbours.down.y] = grids.GetHexWithIndex(point.neighbours.side);
+                grids.Hexagons[point.neighbours.side.x, point.neighbours.up.y] = tempHexR;
                 break;
             default:
                 break;
@@ -231,18 +225,15 @@ public class DotSystem : MonoBehaviour
                  * down->up
                  * up->side
                  */
-                Vector3 upPosL = point.neighbours.up.transform.position;
-                Vector3 downPosL = point.neighbours.down.transform.position;
-                Vector3 sidePosL = point.neighbours.side.transform.position;
+                Vector3 tempL = grids.GetHexWithIndex(point.neighbours.side).transform.position;
+                grids.GetHexWithIndex(point.neighbours.side).transform.position = grids.GetHexWithIndex(point.neighbours.down).transform.position;
+                grids.GetHexWithIndex(point.neighbours.down).transform.position = grids.GetHexWithIndex(point.neighbours.up).transform.position;
+                grids.GetHexWithIndex(point.neighbours.up).transform.position = tempL;
 
-                Hexagon tempL = point.neighbours.side;
-                point.neighbours.side = point.neighbours.up;
-                point.neighbours.up = point.neighbours.down;
-                point.neighbours.down = tempL;
-
-                point.neighbours.up.transform.position = upPosL;
-                point.neighbours.down.transform.position = downPosL;
-                point.neighbours.side.transform.position = sidePosL;
+                Hexagon tempHexL = grids.GetHexWithIndex(point.neighbours.side);
+                grids.Hexagons[point.neighbours.side.x, point.neighbours.side.y] = grids.GetHexWithIndex(point.neighbours.up);
+                grids.Hexagons[point.neighbours.up.x, point.neighbours.up.y] = grids.GetHexWithIndex(point.neighbours.down);
+                grids.Hexagons[point.neighbours.down.x, point.neighbours.down.y] = tempHexL;
                 break;
             case EPointType.RIGHT:
                 /*
@@ -250,18 +241,15 @@ public class DotSystem : MonoBehaviour
                 * down->side
                 * side->up
                 */
-                Vector3 upPosR = point.neighbours.up.transform.position;
-                Vector3 downPosR = point.neighbours.down.transform.position;
-                Vector3 sidePosR = point.neighbours.side.transform.position;
+                Vector3 tempR = grids.GetHexWithIndex(point.neighbours.up).transform.position;
+                grids.GetHexWithIndex(point.neighbours.up).transform.position = grids.GetHexWithIndex(point.neighbours.down).transform.position;
+                grids.GetHexWithIndex(point.neighbours.down).transform.position = grids.GetHexWithIndex(point.neighbours.side).transform.position;
+                grids.GetHexWithIndex(point.neighbours.side).transform.position = tempR;
 
-                Hexagon tempR = point.neighbours.up;
-                point.neighbours.up = point.neighbours.side;
-                point.neighbours.side = point.neighbours.down;
-                point.neighbours.down = tempR;
-
-                point.neighbours.up.transform.position = upPosR;
-                point.neighbours.down.transform.position = downPosR;
-                point.neighbours.side.transform.position = sidePosR;
+                Hexagon tempHexR = grids.GetHexWithIndex(point.neighbours.up);
+                grids.Hexagons[point.neighbours.up.x, point.neighbours.up.y] = grids.GetHexWithIndex(point.neighbours.side);
+                grids.Hexagons[point.neighbours.side.x, point.neighbours.side.y] = grids.GetHexWithIndex(point.neighbours.down);
+                grids.Hexagons[point.neighbours.down.x, point.neighbours.down.y] = tempHexR;
                 break;
             default:
                 break;
@@ -285,6 +273,6 @@ public class DotSystem : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-       
+      
     }
 }
