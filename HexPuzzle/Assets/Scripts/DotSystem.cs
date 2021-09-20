@@ -173,6 +173,101 @@ public class DotSystem : MonoBehaviour
             }
         }
     }
+
+    public void RotateClockWise(RotationPoint point)
+    {
+        switch (point.type)
+        {
+            case EPointType.LEFT:
+                /*
+                 * side->up
+                 * up->down
+                 * down->side
+                 */
+                Vector3 upPosL = point.neighbours.up.transform.position;
+                Vector3 downPosL = point.neighbours.down.transform.position;
+                Vector3 sidePosL = point.neighbours.side.transform.position;
+
+                Hexagon tempL = point.neighbours.side;
+                point.neighbours.side = point.neighbours.down;
+                point.neighbours.down = point.neighbours.up;
+                point.neighbours.up = tempL;
+                
+                point.neighbours.up.transform.position = upPosL;
+                point.neighbours.down.transform.position = downPosL;
+                point.neighbours.side.transform.position = sidePosL;
+                break;
+            case EPointType.RIGHT:
+                /*
+                * up->side
+                * side->down
+                * down->up
+                */
+                Vector3 upPosR = point.neighbours.up.transform.position;
+                Vector3 downPosR = point.neighbours.down.transform.position;
+                Vector3 sidePosR = point.neighbours.side.transform.position;
+             
+                Hexagon tempR = point.neighbours.up;
+                point.neighbours.up = point.neighbours.down;
+                point.neighbours.down = point.neighbours.side;
+                point.neighbours.side = tempR;
+
+                point.neighbours.up.transform.position = upPosR;
+                point.neighbours.down.transform.position = downPosR;
+                point.neighbours.side.transform.position = sidePosR;
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void RotateAntiClockWise(RotationPoint point)
+    {
+        switch (point.type)
+        {
+            case EPointType.LEFT:
+                /*
+                 * side->down
+                 * down->up
+                 * up->side
+                 */
+                Vector3 upPosL = point.neighbours.up.transform.position;
+                Vector3 downPosL = point.neighbours.down.transform.position;
+                Vector3 sidePosL = point.neighbours.side.transform.position;
+
+                Hexagon tempL = point.neighbours.side;
+                point.neighbours.side = point.neighbours.up;
+                point.neighbours.up = point.neighbours.down;
+                point.neighbours.down = tempL;
+
+                point.neighbours.up.transform.position = upPosL;
+                point.neighbours.down.transform.position = downPosL;
+                point.neighbours.side.transform.position = sidePosL;
+                break;
+            case EPointType.RIGHT:
+                /*
+                * up->down
+                * down->side
+                * side->up
+                */
+                Vector3 upPosR = point.neighbours.up.transform.position;
+                Vector3 downPosR = point.neighbours.down.transform.position;
+                Vector3 sidePosR = point.neighbours.side.transform.position;
+
+                Hexagon tempR = point.neighbours.up;
+                point.neighbours.up = point.neighbours.side;
+                point.neighbours.side = point.neighbours.down;
+                point.neighbours.down = tempR;
+
+                point.neighbours.up.transform.position = upPosR;
+                point.neighbours.down.transform.position = downPosR;
+                point.neighbours.side.transform.position = sidePosR;
+                break;
+            default:
+                break;
+        }
+    }
+
     private void Awake()
     {
         // Calculate width and height of dots area by using dimensions of grid
@@ -190,6 +285,6 @@ public class DotSystem : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+       
     }
 }
