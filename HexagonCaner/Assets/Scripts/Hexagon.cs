@@ -3,8 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Hexagon : MonoBehaviour
-{
-    // Start is called before the first frame update
+{  
+    public Color GetColor()
+    {
+        return GetComponent<Renderer>().material.GetColor("_Color");
+    } 
+
     void Start()
     {
         

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
+using DG.Tweening;
+
 using static RotationPoint;
 
 public class DotSystem : MonoBehaviour
@@ -15,11 +17,11 @@ public class DotSystem : MonoBehaviour
     private float dotsHeight;
     public float DotsWidth { get { return dotsWidth; } private set { } }
     public float DotsHeight { get { return dotsHeight; } private set { } }
-    private Transform InstantiateTopRight(Transform hex)
+    private Transform InstantiateTopRight(Vector3 pos)
     {
         float posX, posY;
-        posX = hex.position.x + grids.HexWidth / 4;
-        posY = hex.position.y + grids.HexHeight / 2;
+        posX = pos.x + grids.HexWidth / 4;
+        posY = pos.y + grids.HexHeight / 2;
 
         Transform instance = Instantiate(rotatePointPrefab) as Transform;
         instance.name = "RotationPoint";
@@ -28,11 +30,11 @@ public class DotSystem : MonoBehaviour
         dotTransforms.Add(instance);
         return instance;
     }
-    private Transform InstantiateTopLeft(Transform hex)
+    private Transform InstantiateTopLeft(Vector3 pos)
     {
         float posX, posY;
-        posX = hex.position.x - grids.HexWidth / 4;
-        posY = hex.position.y + grids.HexHeight / 2;
+        posX = pos.x - grids.HexWidth / 4;
+        posY = pos.y + grids.HexHeight / 2;
 
         Transform instance = Instantiate(rotatePointPrefab) as Transform;
         instance.name = "RotationPoint";
@@ -42,11 +44,11 @@ public class DotSystem : MonoBehaviour
         return instance;
     }
 
-    private void FindNeighbours(RotationPoint point, int column, int row)
+    private void FindNeighbors(RotationPoint point, int column, int row)
     {
         /* 
          * Each rotation point has 3 different hexagon around itself
-         * Neighbours can be found by rotation point indexes
+         * Neighbors can be found by rotation point indexes
          * But the calculation of the indexes depends on which column that rotation point is in
          */
         int type = column % 4;
@@ -55,27 +57,27 @@ public class DotSystem : MonoBehaviour
         {
             case 0:
                 point.type = EPointType.RIGHT;
-                point.neighbours.up = new Vector2Int(column / 2, row + 1);
-                point.neighbours.down = new Vector2Int(column / 2, row);
-                point.neighbours.side = new Vector2Int((column / 2) + 1, row + 1); 
+                point.neighbors.up = new Vector2Int(column / 2, row + 1);
+                point.neighbors.down = new Vector2Int(column / 2, row);
+                point.neighbors.side = new Vector2Int((column / 2) + 1, row + 1); 
                 break;
             case 1:
                 point.type = EPointType.LEFT;
-                point.neighbours.up = new Vector2Int((column + 1) / 2, row + 1);
-                point.neighbours.down = new Vector2Int((column + 1) / 2, row);
-                point.neighbours.side = new Vector2Int(((column + 1) / 2) - 1, row);
+                point.neighbors.up = new Vector2Int((column + 1) / 2, row + 1);
+                point.neighbors.down = new Vector2Int((column + 1) / 2, row);
+                point.neighbors.side = new Vector2Int(((column + 1) / 2) - 1, row);
                 break;
             case 2:
                 point.type = EPointType.RIGHT;
-                point.neighbours.up = new Vector2Int(column / 2, row + 1);
-                point.neighbours.down = new Vector2Int(column / 2, row);
-                point.neighbours.side = new Vector2Int((column / 2) + 1, row);
+                point.neighbors.up = new Vector2Int(column / 2, row + 1);
+                point.neighbors.down = new Vector2Int(column / 2, row);
+                point.neighbors.side = new Vector2Int((column / 2) + 1, row);
                 break;
             case 3:
                 point.type = EPointType.LEFT;
-                point.neighbours.up = new Vector2Int((column + 1) / 2, row + 1);
-                point.neighbours.down = new Vector2Int((column + 1) / 2, row);
-                point.neighbours.side = new Vector2Int(((column + 1) / 2) - 1, row + 1);
+                point.neighbors.up = new Vector2Int((column + 1) / 2, row + 1);
+                point.neighbors.down = new Vector2Int((column + 1) / 2, row);
+                point.neighbors.side = new Vector2Int(((column + 1) / 2) - 1, row + 1);
                 break;
             default:
                 break;
@@ -87,14 +89,14 @@ public class DotSystem : MonoBehaviour
         //TODO: Same color check needs improvement
 
         int colorIndex = 0;
-        Neighbours neighbours = point.neighbours;
+        Neighbors neighbors = point.neighbors;
         List<Color> colors = grids.Colors;
        
         List<Material> materials = new List<Material>()
         {
-            grids.GetHexWithIndex(neighbours.up).GetComponent<Renderer>().material,
-            grids.GetHexWithIndex(neighbours.down).GetComponent<Renderer>().material,
-            grids.GetHexWithIndex(neighbours.side).GetComponent<Renderer>().material,
+            grids.GetHexWithIndex(neighbors.up).GetComponent<Renderer>().material,
+            grids.GetHexWithIndex(neighbors.down).GetComponent<Renderer>().material,
+            grids.GetHexWithIndex(neighbors.side).GetComponent<Renderer>().material,
         };
 
         foreach (var mat in materials)
@@ -122,7 +124,7 @@ public class DotSystem : MonoBehaviour
     {
         /*
          *  1) Instantiate rotation points by using hexagons' positions on the grid
-         *  2) Find all three neighbour hexagon of the point
+         *  2) Find all three neighbors hexagon of the point
          *  3) Insert rotation point to the array
          */
         for (int y = 0; y < grids.GridHeight - 1; y++)
@@ -130,26 +132,25 @@ public class DotSystem : MonoBehaviour
             for (int x = 0; x < grids.GridWidth; x++)
             {
                 //Find the next hexagon's position
-                int hexIndex = (int)(y * grids.GridWidth + x);
                 int dotX;
-                Transform hexPos = grids.HexTransforms[hexIndex];
+                Vector3 hexPos = grids.HexPositions[x, y];
                 Transform dotPos;
 
-                if (x == 0) //Fist coloum hexagons have only top right rotation point 
+                if (x == 0) //Fist coloumn hexagons have only top right rotation point 
                 {
                     dotX = 0;
                     dotPos = InstantiateTopRight(hexPos);
                     RotationPoint point = dotPos.GetComponentInParent<RotationPoint>();
-                    FindNeighbours(point, dotX, y);
+                    FindNeighbors(point, dotX, y);
                     SetFirstColors(point);
                     dots[dotX, y] = point;
                 }
-                else if (x == grids.GridWidth - 1) //Last coloum hexagons have only top left rotation point 
+                else if (x == grids.GridWidth - 1) //Last coloumn hexagons have only top left rotation point 
                 {
                     dotX = 2 * x - 1;
                     dotPos = InstantiateTopLeft(hexPos);
                     RotationPoint point = dotPos.GetComponentInParent<RotationPoint>();
-                    FindNeighbours(point, dotX, y);
+                    FindNeighbors(point, dotX, y);
                     SetFirstColors(point);
                     dots[dotX, y] = point;
                 }
@@ -158,14 +159,14 @@ public class DotSystem : MonoBehaviour
                     dotX = 2 * x - 1;
                     dotPos = InstantiateTopLeft(hexPos);
                     RotationPoint point = dotPos.GetComponentInParent<RotationPoint>();
-                    FindNeighbours(point, dotX, y);
+                    FindNeighbors(point, dotX, y);
                     SetFirstColors(point);
                     dots[dotX, y] = point;
 
                     dotX = 2 * x;
                     dotPos = InstantiateTopRight(hexPos);
                     RotationPoint point2 = dotPos.GetComponentInParent<RotationPoint>();
-                    FindNeighbours(point2, dotX, y);
+                    FindNeighbors(point2, dotX, y);
                     SetFirstColors(point2);
                     dots[dotX, y] = point2;
                 }
@@ -173,100 +174,10 @@ public class DotSystem : MonoBehaviour
         }
     }
 
-    public void RotateClockWise(RotationPoint point)
-    {
-        grids.hexagonRotationStatus = true;
-
-        switch (point.type)
-        {
-            case EPointType.LEFT:
-                /*
-                 * side->up
-                 * up->down
-                 * down->side
-                 */             
-                Vector3 tempL = grids.GetHexWithIndex(point.neighbours.side).transform.position;
-                grids.GetHexWithIndex(point.neighbours.side).transform.position = grids.GetHexWithIndex(point.neighbours.up).transform.position;
-                grids.GetHexWithIndex(point.neighbours.up).transform.position = grids.GetHexWithIndex(point.neighbours.down).transform.position;
-                grids.GetHexWithIndex(point.neighbours.down).transform.position = tempL;
-           
-                Hexagon tempHexL = grids.GetHexWithIndex(point.neighbours.side);
-                grids.Hexagons[point.neighbours.side.x, point.neighbours.side.y] = grids.GetHexWithIndex(point.neighbours.down);
-                grids.Hexagons[point.neighbours.down.x, point.neighbours.down.y] = grids.GetHexWithIndex(point.neighbours.up);
-                grids.Hexagons[point.neighbours.up.x, point.neighbours.up.y] = tempHexL;
-                break;
-            case EPointType.RIGHT:
-                /*
-                * up->side
-                * side->down
-                * down->up
-                */
-                Vector3 tempR = grids.GetHexWithIndex(point.neighbours.up).transform.position;
-                grids.GetHexWithIndex(point.neighbours.up).transform.position = grids.GetHexWithIndex(point.neighbours.side).transform.position;
-                grids.GetHexWithIndex(point.neighbours.side).transform.position = grids.GetHexWithIndex(point.neighbours.down).transform.position;
-                grids.GetHexWithIndex(point.neighbours.down).transform.position = tempR;
-
-                Hexagon tempHexR = grids.GetHexWithIndex(point.neighbours.up);
-                grids.Hexagons[point.neighbours.up.x, point.neighbours.up.y] = grids.GetHexWithIndex(point.neighbours.down);
-                grids.Hexagons[point.neighbours.down.x, point.neighbours.down.y] = grids.GetHexWithIndex(point.neighbours.side);
-                grids.Hexagons[point.neighbours.side.x, point.neighbours.side.y] = tempHexR;
-                break;
-            default:
-                break;
-        }
-
-        grids.hexagonRotationStatus = false;
-    }
-
-    public void RotateAntiClockWise(RotationPoint point)
-    {
-        grids.hexagonRotationStatus = true;
-
-        switch (point.type)
-        {
-            case EPointType.LEFT:
-                /*
-                 * side->down
-                 * down->up
-                 * up->side
-                 */
-                Vector3 tempL = grids.GetHexWithIndex(point.neighbours.side).transform.position;
-                grids.GetHexWithIndex(point.neighbours.side).transform.position = grids.GetHexWithIndex(point.neighbours.down).transform.position;
-                grids.GetHexWithIndex(point.neighbours.down).transform.position = grids.GetHexWithIndex(point.neighbours.up).transform.position;
-                grids.GetHexWithIndex(point.neighbours.up).transform.position = tempL;
-
-                Hexagon tempHexL = grids.GetHexWithIndex(point.neighbours.side);
-                grids.Hexagons[point.neighbours.side.x, point.neighbours.side.y] = grids.GetHexWithIndex(point.neighbours.up);
-                grids.Hexagons[point.neighbours.up.x, point.neighbours.up.y] = grids.GetHexWithIndex(point.neighbours.down);
-                grids.Hexagons[point.neighbours.down.x, point.neighbours.down.y] = tempHexL;
-                break;
-            case EPointType.RIGHT:
-                /*
-                * up->down
-                * down->side
-                * side->up
-                */
-                Vector3 tempR = grids.GetHexWithIndex(point.neighbours.up).transform.position;
-                grids.GetHexWithIndex(point.neighbours.up).transform.position = grids.GetHexWithIndex(point.neighbours.down).transform.position;
-                grids.GetHexWithIndex(point.neighbours.down).transform.position = grids.GetHexWithIndex(point.neighbours.side).transform.position;
-                grids.GetHexWithIndex(point.neighbours.side).transform.position = tempR;
-
-                Hexagon tempHexR = grids.GetHexWithIndex(point.neighbours.up);
-                grids.Hexagons[point.neighbours.up.x, point.neighbours.up.y] = grids.GetHexWithIndex(point.neighbours.side);
-                grids.Hexagons[point.neighbours.side.x, point.neighbours.side.y] = grids.GetHexWithIndex(point.neighbours.down);
-                grids.Hexagons[point.neighbours.down.x, point.neighbours.down.y] = tempHexR;
-                break;
-            default:
-                break;
-        }
-
-        grids.hexagonRotationStatus = false;
-    }
-
     public RotationPoint FindClosestPoint(Vector3 clickPos)
     {
         RotationPoint point = null;
-        float minLenght = 999;
+        float minLenght = float.PositiveInfinity;
         Vector3 diff;
 
         for (int y = 0; y < dotsHeight; y++)
@@ -284,6 +195,7 @@ public class DotSystem : MonoBehaviour
 
         return point;
     }
+
     private void Awake()
     {
         // Calculate width and height of dots area by using dimensions of grid

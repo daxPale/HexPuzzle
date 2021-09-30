@@ -10,17 +10,20 @@ public class InputManager : MonoBehaviour
     [SerializeField] private Transform selectSprite;
 
     private Transform selectInstance;
-
     private RotationPoint selectedPoint;
+    public RotationPoint SelectedPoint { get { return selectedPoint; } }
+
     private bool selected = false;
-    private bool clockwise = false;
-    public void RotateClockwiseSelectedPoint() { dotSystem.RotateClockWise(selectedPoint); }
-    public void RotateAntiClockwiseSelectedPoint() { dotSystem.RotateAntiClockWise(selectedPoint); } 
+    public void SetSelectCursor(bool active)
+    {
+        selected = active;
+        selectInstance.gameObject.SetActive(selected);
+    }
 
     void Start()
     {
         selectInstance = Instantiate(selectSprite) as Transform;
-        selectInstance.gameObject.SetActive(selected);
+        SetSelectCursor(false);
     }
 
     // Update is called once per frame

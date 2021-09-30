@@ -6,7 +6,7 @@ public class RotationPoint : MonoBehaviour
 {
     [SerializeField] GameObject selectSprite;
 
-    public Neighbours neighbours;
+    public Neighbors neighbors;
     public EPointType type;
 
     public void AdjustSelectSpriteTransform(Transform selectInstance)
@@ -34,7 +34,7 @@ public class RotationPoint : MonoBehaviour
     }
 
     //Neighbors hold the indexes of neighbor hexagons of rotation point
-    public struct Neighbours
+    public struct Neighbors
     {
         public Vector2Int up;
         public Vector2Int down;
