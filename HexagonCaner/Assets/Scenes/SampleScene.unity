@@ -294,6 +294,8 @@ MonoBehaviour:
   inputManager: {fileID: 1926859389}
   dotSystem: {fileID: 1031457018}
   gridSystem: {fileID: 1690191397}
+  explosionParticles: {fileID: 2501461101421598765, guid: 2178fc685786a354c934f07b8f4b0d15,
+    type: 3}
   scoreBoard: {fileID: 1043433092}
 --- !u!4 &362073818
 Transform:
@@ -381,7 +383,7 @@ ParticleSystem:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 362073816}
   serializedVersion: 6
-  lengthInSec: 0.5
+  lengthInSec: 0.05
   simulationSpeed: 1
   stopAction: 0
   cullingMode: 0

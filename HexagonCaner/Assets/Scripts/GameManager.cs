@@ -11,9 +11,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] private InputManager inputManager;
     [SerializeField] private DotSystem dotSystem;
     [SerializeField] private GridSystem gridSystem;
+    [SerializeField] private Transform explosionParticles;
     [SerializeField] private Text scoreBoard;
 
-    private ParticleSystem explosionParticles;
     public void RotateClockwiseSelectedPoint()
     {
         if (gridSystem.InputAvailabile())
@@ -128,10 +128,13 @@ public class GameManager : MonoBehaviour
 
     private void ExplosionParticles(Vector3 pos, Color color)
     {
-        explosionParticles.transform.position = new Vector3(pos.x, pos.y, pos.z - 5.0f);
-        var main = explosionParticles.main;
+        Transform particles = Instantiate(explosionParticles) as Transform;
+        particles.position = new Vector3(pos.x, pos.y, pos.z - 5.0f);
+        var particleComponent = particles.GetComponent<ParticleSystem>();
+        var main = particleComponent.GetComponent<ParticleSystem>().main;
         main.startColor = color;
-        explosionParticles.Play();
+        particleComponent.Play();
+        Destroy(particles.gameObject, 1);
     }
 
     public void CheckExplosions()
@@ -225,7 +228,7 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        explosionParticles = GetComponent<ParticleSystem>();
+       
     }
 
     // Update is called once per frame
